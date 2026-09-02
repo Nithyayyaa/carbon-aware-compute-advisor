@@ -1,4 +1,4 @@
-from turtle import pd
+import pandas as pd
 
 from cace.emissions_factors import EMISSIONS_FACTORS_G_PER_KWH
 
@@ -31,7 +31,7 @@ def _row_to_generation_mix(row: "pd.Series") -> dict:
     suffix="- Actual Aggregated"
     for col,value in row.items():
         if col.endswith(suffix):
-            clean_name = col.replace(suffix, "").strip().lower()
+            clean_name = col.replace(suffix, "").strip()
             mix[clean_name] = value
     return mix 
 
@@ -44,14 +44,13 @@ def compute_carbon_intensity_series(df: "pd.DataFrame") -> "pd.Series":
     Returns: a pd.Series indexed by the same timestamps, one carbon
         intensity value (gCO2/kWh) per row.
     """
-    # TODO:
-    #  1. Make an empty dict (or list) to collect results.
-    #  2. Loop over df.iterrows() -> for each (timestamp, row):
-    #       - build a generation_mix dict via _row_to_generation_mix(row)
-    #       - call compute_carbon_intensity(generation_mix)
-    #       - store the result against that timestamp
-    #  3. Turn the collected results into a pd.Series (index=timestamps).
-    pass
+    
+    intensities = {}
+    for timestamp, row in df.iterrows():
+        generation_mix = _row_to_generation_mix(row)
+        intensities[timestamp] = compute_carbon_intensity(generation_mix)
+
+    return pd.Series(intensities, dtype=float)
 
 
 if __name__ == "__main__":
